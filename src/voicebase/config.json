@@ -1,0 +1,26 @@
+{
+    "speechModel": {
+        "language": "en-US"
+    },
+    "transcript": {
+        "formatting": {
+            "enableNumberFormatting": false
+        }
+    },
+    "vocabularies": [
+        {
+            "vocabularyType": "terms",
+            "terms": [
+                {
+                    "term": "Bryon"
+                },
+                {
+                    "term": "Voicebase"
+                },
+                {
+                    "term": "Embbnux"
+                }
+            ]
+        }
+    ]
+}
