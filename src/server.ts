@@ -15,7 +15,8 @@ async function main() {
     let fullSync = await fullSyncRes.json();
     let syncInfo = fullSync.syncInfo;
 
-    fullSync.records.forEach(onNewVoiceMail)
+    let ext = await rc.account().extension().get();
+    fullSync.records.forEach(m => onNewVoiceMail(m, ext));
 
     let subscription = rc.createSubscription();
     await subscription.subscribe(['/account/~/extension/~/message-store']);
@@ -27,10 +28,18 @@ async function main() {
         let res = await rc.get('/account/~/extension/' + evt.extensionId + '/message-sync', { syncType: 'ISync', syncToken: syncInfo.syncToken });
         let msgList = await res.json();
         syncInfo = msgList.syncInfo;
-        msgList.records.forEach(onNewVoiceMail)
+        let ext = await rc.account().extension(evt.extensionId).get();
+        msgList.records.forEach(m => onNewVoiceMail(m, ext));
     });
 }
 
-function onNewVoiceMail(voiceMail) {
-    console.log('Voicemail got', voiceMail)
+function onNewVoiceMail(voiceMail, ownerExt) {
+    let customVocabulary = [];
+
+    // Get names of callee from RC
+    let ownerContactInfo = ownerExt.contact;
+    customVocabulary.push(ownerContactInfo.firstName, ownerContactInfo.lastName);
+    console.log('Voicemail got', voiceMail, customVocabulary);
+
+    // Get names of caller from salesforce
 }
