@@ -11,14 +11,25 @@ export default class VoiceBase {
     constructor(public token: string) {
     }
 
+    /**
+     * 
+     * @param dataSrc FIXME Response body of node-fetch is not supported.
+     * @param config 
+     */
     async recognize(dataSrc: Readable, config) {
         let body = new FormData()
         body.append('configuration', JSON.stringify(config))
+        dataSrc['path'] = dataSrc['path'] || 'voicemail.mp3'
         body.append('media', dataSrc)
         let res = await this.call('/media', {
             method: 'POST',
             body
         });
+
+        if (!res.ok) {
+            let txt = await res.text();
+            throw new Error('HTTP Error, status: ' + res.status + ', response: ' + txt);
+        }
         /*
         { _links:
             { self: { href: '/v3/media/xxxx' },

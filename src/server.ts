@@ -2,11 +2,14 @@ import RingCentral from 'ringcentral-ts';
 import FileTokenStore from 'ringcentral-ts/FileTokenStore';
 import { Connection } from 'jsforce';
 import config from './config';
+import VoiceBase from './voicebase/VoiceBaseApi';
+
+let voicebase = new VoiceBase(config.voicebaseToken);
+let rc = new RingCentral(config.RingCentral.app);
 
 main();
 
 async function main() {
-    let rc = new RingCentral(config.RingCentral.app);
     rc.tokenStore = new FileTokenStore('data/' + config.RingCentral.tokenFile);
     await rc.getToken().catch(e => {
         return rc.auth(config.RingCentral.user);
@@ -38,16 +41,25 @@ async function main() {
 }
 
 async function onNewVoiceMail(voiceMail, rcUser) {
+    let audioAttachment = voiceMail.attachments.find(atc => atc.type === 'AudioRecording');
+    if (!audioAttachment) {
+        return
+    }
     let customVocabulary = [];
-
     // Get names of callee from RC
     let ownerContact = rcUser.contact;
     customVocabulary.push(ownerContact.firstName, ownerContact.lastName);
-    console.log('Voicemail got', voiceMail, ownerContact);
 
     // Get names of caller from salesforce
     let callerInfo = await getSfContactByNumber(voiceMail.from.phoneNumber);
-    console.log('>>found sf ', callerInfo)
+    customVocabulary.push(callerInfo.FirstName, callerInfo.LastName);
+
+    console.log('Custom vocabulary', customVocabulary)
+
+    let audioRes = await rc.get(audioAttachment.uri);
+    let transcript = await voicebase.recognizeWithCustomTerms(<any>audioRes.body, customVocabulary)
+    console.log('Voicemail transcript', transcript, '.')
+
 }
 
 async function getSfContactByNumber(number) {
