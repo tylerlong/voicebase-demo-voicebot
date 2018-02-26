@@ -60,6 +60,37 @@ async function onNewVoiceMail(voiceMail, rcUser) {
     let transcript = await voicebase.recognizeWithCustomTerms(<any>audioRes.body, customVocabulary)
     console.log('Voicemail transcript', transcript, '.')
 
+    // Find sf user by rc user info: select id,name from User where (FirstName='Kevin' and LastName='Zeng') or UserName='kevin.zeng@ringcentral.com' or Email='kevin.zeng@ringcentral.com'
+
+    let owner = await getSfUserByRcUser(ownerContact);
+
+    await createSfTask({
+        Subject: `Missed call with voicemail from ${callerInfo.FirstName} ${callerInfo.LastName} (${voiceMail.from.phoneNumber})`,
+        OwnerId: owner.Id,    // Callee
+        WhoId: callerInfo.Id,      // Caller
+        Description: `Voicemail transcript: ${transcript}.
+
+Link: ${audioAttachment.uri}.`
+    })
+}
+
+async function createSfTask(task: { Subject, Description, OwnerId, WhoId }) {
+    let sf = await getSfClient();
+    await new Promise((resolve, reject) => {
+        sf.sobject('Task').create(task, (err, ret) => {
+            err ? reject(err) : resolve(ret);
+        });
+    });
+
+}
+
+async function getSfUserByRcUser(rcUser) {
+    let sf = await getSfClient();
+    let { firstName, lastName, email } = rcUser;
+    let q = `select id,name from User where (FirstName='${firstName}' and LastName='${lastName}') or UserName='${email}' or Email='${email}'`;
+    // TODO escape variables in SOSL
+    let res = await sf.query(q);
+    return res.records[0]
 }
 
 async function getSfContactByNumber(number) {
