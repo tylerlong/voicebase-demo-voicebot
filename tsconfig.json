@@ -16,5 +16,8 @@
 		"src/voicebase/recognize.ts",
 		"src/server.ts"
 	],
+	"include": [
+		"src/lambda/*.ts"
+	],
 	"compileOnSave": true
 }
