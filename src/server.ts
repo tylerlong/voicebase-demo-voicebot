@@ -15,6 +15,12 @@ async function main() {
         return rc.auth(config.RingCentral.user);
     })
 
+    let cmd = process.argv[2];
+    if (cmd === 'webhook') {
+        registerWebHook();
+        return;
+    }
+
     let fullSyncRes = await rc.get('/account/~/extension/~/message-sync', { messageType: 'VoiceMail', syncType: 'FSync' });
     let fullSync = await fullSyncRes.json();
     let syncInfo = fullSync.syncInfo;
@@ -114,4 +120,17 @@ function getSfClient() {
             err ? reject(err) : resolve(salesforceClient);
         });
     });
+}
+
+
+async function registerWebHook() {
+    let res = await rc.subscription().post({
+        eventFilters: ['/restapi/v1.0/account/~/extension/~/message-store'],
+        deliveryMode: {
+            "transportType": "WebHook",
+            "encryption": false,
+            "address": "https://msnuhqu1hk.execute-api.us-east-1.amazonaws.com/dev/hook/new-voicemail"
+        }
+    })
+    console.log('Webhook subscription', res)
 }
