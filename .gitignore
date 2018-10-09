@@ -7,3 +7,4 @@ jspm_packages
 
 # Serverless directories
 .serverless
+yarn-error.log

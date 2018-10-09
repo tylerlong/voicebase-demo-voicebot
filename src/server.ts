@@ -27,14 +27,16 @@ async function main() {
     let fullSync = await fullSyncRes.json();
     let syncInfo = fullSync.syncInfo;
 
-    let ext = await rc.account().extension().get();
+    // let ext = await rc.account().extension().get();
+    await rc.account().extension().get();
+
     if (fullSync.records.length < 1) {
         console.log('No voicemail at the moment')
     }
     // fullSync.records.forEach(m => onNewVoiceMail(m, ext));
 
     let subscription = rc.createSubscription();
-    await subscription.subscribe(['/account/~/extension/~/message-store']);
+    await subscription.subscribe(['/account/~/extension/~/message-store']); // todo: for prod, event filters should be the whole company
     subscription.onMessage(async msg => {
         handleVoicemailNotification(msg, syncInfo.syncToken, rc, sf, voicebase);
     });

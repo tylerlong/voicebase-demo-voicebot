@@ -19,7 +19,7 @@ export default class VoiceBase {
     async recognize(dataSrc: Readable, config) {
         let body = new FormData()
         body.append('configuration', JSON.stringify(config))
-        dataSrc['path'] = dataSrc['path'] || 'voicemail.mp3'
+        dataSrc['path'] = dataSrc['path'] || 'voicemail.mp3' // hack
         body.append('media', dataSrc)
         let res = await this.call('/media', {
             method: 'POST',

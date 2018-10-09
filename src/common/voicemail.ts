@@ -66,6 +66,6 @@ async function getSfUserByRcUser(rcUser, sf) {
 async function getSfContactByNumber(number, sf) {
     // TODO escape variables in SOSL
     number = number.replace(/[+}]/g, '\\$&');
-    let res = await sf.search(`FIND {${number}} IN PHONE FIELDS RETURNING Contact(Id,FirstName,LastName limit 1),Lead`);
+    let res = await sf.search(`FIND {${number}} IN PHONE FIELDS RETURNING Contact(Id,FirstName,LastName limit 1),Lead`); // todo: improve this sosl
     return res.searchRecords[0];
 }

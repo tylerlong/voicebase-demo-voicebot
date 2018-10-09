@@ -14,5 +14,5 @@ main()
 async function main() {
     let voicebase = new VoiceBase(config.voicebaseToken);
     let transcript = await voicebase.recognizeWithCustomTerms(fs.createReadStream(mediaFile), customVocabularyTerms);
-    console.log('Transcript', transcript);
+    console.log('Transcript:', transcript);
 }
